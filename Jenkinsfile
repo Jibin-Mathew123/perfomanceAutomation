@@ -20,20 +20,22 @@ pipeline {
         stage('Publish Gatling Report') {
             steps {
                 script {
-                    def baseDir = new File("${env.WORKSPACE}/target/gatling")
-                    def latestReport = baseDir
-                        .listFiles()
-                        .findAll { it.isDirectory() }
-                        .sort { -it.lastModified() }
-                        .first()
+                    def files = findFiles(glob: 'target/gatling/*/index.html')
+                    if (files.length == 0) {
+                        echo "⚠️ No Gatling report found."
+                        return
+                    }
 
-                    echo "Latest Gatling report folder: ${latestReport}"
+                    def latestReport = files.sort { -it.lastModified }.first()
+                    def reportDir = new File(latestReport.path).getParent()
+
+                    echo " Publishing Gatling report from: ${reportDir}"
 
                     publishHTML([
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: "${latestReport}",
+                        reportDir: reportDir,
                         reportFiles: 'index.html',
                         reportName: 'Gatling Report'
                     ])
