@@ -19,7 +19,7 @@ pipeline {
 
     stage('Build & Run Gatling Test') {
       steps {
-        sh 'mvn clean gatling:test'
+        bat 'mvn clean gatling:test'
       }
     }
 
