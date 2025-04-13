@@ -24,65 +24,68 @@ pipeline {
       }
     }
 
-      stage('Archive Gatling Reports') {
-           steps {
-             script {
-               // Wait for reports to be generated
-               sleep(time: 10, unit: 'SECONDS')
+      stage('Publish Gatling Report') {
+            steps {
+              script {
+                // Wait for files to be written
+                sleep(time: 15, unit: 'SECONDS')
 
-               // Debug: List all contents of gatling directory
-               bat """
-                 @echo off
-                 echo Listing contents of %WORKSPACE%\\target\\gatling
-                 dir /s /b "%WORKSPACE%\\target\\gatling"
-               """
+                // Debug: Show exact directory structure
+                bat """
+                  @echo off
+                  echo FULL GATLING DIRECTORY STRUCTURE:
+                  dir /s /b "%WORKSPACE%\\target\\gatling"
+                  echo CURRENT WORKSPACE: %WORKSPACE%
+                """
 
-               // Find all simulation folders (excluding lastRun.txt)
-               def simulationDirs = findFiles(glob: "${GATLING_REPORTS_DIR}/basicsimulation-*")
+                // Get the actual path that works
+                def gatlingPath = "${env.WORKSPACE}\\target\\gatling".replace('/', '\\')
 
-               if (simulationDirs.size() == 0) {
-                 error "No Gatling simulation directories found matching pattern ${GATLING_REPORTS_DIR}/basicsimulation-*"
-               }
+                // Find the most recent simulation directory
+                def cmd = """
+                  @echo off
+                  for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\basicsimulation-*"') do (
+                    set LAST_DIR=%%i
+                  )
+                  echo %LAST_DIR%
+                """
 
-               // Get the most recent simulation folder
-               def latestSimulation = simulationDirs.sort { -it.lastModified }[0].name
-               def reportPath = "${GATLING_REPORTS_DIR}/${latestSimulation}"
+                def lastDir = bat(script: cmd, returnStdout: true).trim()
 
-               echo " Found Gatling report at: ${reportPath}"
+                if (!lastDir) {
+                  error " No Gatling simulation directories found in ${gatlingPath}"
+                }
 
-               // Verify index.html exists
-               if (!fileExists("${reportPath}/index.html")) {
-                 error " Gatling report index.html not found in ${reportPath}"
-               }
+                def reportPath = "${GATLING_REPORTS_BASE}/${lastDir}".replace('\\', '/')
+                echo " Found Gatling report at: ${reportPath}"
 
-               // Publish HTML report
-               publishHTML([
-                 target: [
-                   reportDir: reportPath,
-                   reportFiles: 'index.html',
-                   reportName: 'Gatling Report',
-                   keepAll: true,
-                   alwaysLinkToLastBuild: true,
-                   allowMissing: false
-                 ]
-               ])
+                // Publish the report
+                publishHTML([
+                  target: [
+                    reportDir: reportPath,
+                    reportFiles: 'index.html',
+                    reportName: 'Gatling Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                  ]
+                ])
+                echo "✅ Successfully published Gatling report"
+              }
+            }
+          }
+        }
 
-               echo "✅ Successfully published Gatling report"
-             }
-           }
-         }
-       }
-
-       post {
-         always {
-           archiveArtifacts artifacts: "${GATLING_REPORTS_DIR}/**/*", allowEmptyArchive: true
-           echo 'Pipeline execution finished.'
-         }
-         failure {
-           echo 'There was a failure. Check the logs and report.'
-         }
-         success {
-           echo 'Pipeline completed successfully!'
-         }
-       }
-     }
+        post {
+          always {
+            archiveArtifacts artifacts: "${GATLING_REPORTS_BASE}/**/*", allowEmptyArchive: true
+            echo 'Pipeline execution finished.'
+          }
+          failure {
+            echo 'There was a failure. Check the logs and report.'
+          }
+          success {
+            echo 'Pipeline completed successfully!'
+          }
+        }
+      }
