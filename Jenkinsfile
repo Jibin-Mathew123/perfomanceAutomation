@@ -24,16 +24,26 @@ pipeline {
     }
 
     stage('Archive Gatling Reports') {
-      steps {
-        publishHTML(target: [
-          reportDir: 'target/gatling/basicsimulation',
-          reportFiles: 'index.html',
-          reportName: 'Gatling Report',
-          keepAll: true
-        ])
-      }
+        steps {
+            script {
+                // Get the latest simulation directory
+                def simulationsDir = new File("${WORKSPACE}/target/gatling")
+                def latestSimulation = simulationsDir
+                    .listFiles()
+                    .findAll { it.isDirectory() }
+                    .sort { -it.lastModified() }
+                    .first()
+
+                echo "Latest Simulation Folder: ${latestSimulation}"
+
+                // Set environment variable (optional)
+                env.LATEST_GATLING_REPORT = latestSimulation.getAbsolutePath()
+
+                // Archive the report HTML
+                archiveArtifacts artifacts: "${latestSimulation}/**", fingerprint: true
+            }
+        }
     }
-  }
 
   post {
     always {
