@@ -7,8 +7,8 @@ pipeline {
   }
 
   environment {
-    MAVEN_OPTS = "-Dmaven.test.failure.ignore=true"
-  }
+      MAVEN_OPTS = '-Dmaven.repo.local=C:/Users/jibin/.m2/repository'
+    }
 
   stages {
     stage('Checkout') {
