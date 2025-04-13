@@ -19,31 +19,34 @@ pipeline {
 
         stage('Publish Gatling Report') {
             steps {
-               script {
-                   def files = findFiles(glob: 'target/gatling/*/index.html')
-                   if (files.length == 0) {
-                       echo "⚠️ No Gatling report found."
-                       return
-                   }
+                script {
+                    // Find all Gatling report index.html files
+                    def files = findFiles(glob: 'target/gatling/*/index.html')
+                    if (files.length == 0) {
+                        echo "△ No Gatling report found."
+                        return
+                    }
 
-                   def latestReport = files.sort { -it.lastModified }.first()
-                   def reportDir = latestReport.path.replaceAll('/index.html$', '')
+                    // Get the most recent report
+                    def latestReport = files.sort { -it.lastModified }.first()
+                    def reportDir = latestReport.path.replaceAll('/index.html$', '')
 
-                   echo " Publishing Gatling report from: ${reportDir}"
+                    echo "Publishing Gatling report from: ${reportDir}"
 
-                   publishHTML([
-                       allowMissing: false,
-                       alwaysLinkToLastBuild: true,
-                       keepAll: true,
-                       reportDir: reportDir,
-                       reportFiles: 'index.html',
-                       reportName: 'Gatling Report'
-                   ])
-               }
-
+                    // Publish the HTML report
+                    publishHTML(
+                        target: [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: reportDir,
+                            reportFiles: 'index.html',
+                            reportName: 'Gatling Report'
+                        ]
+                    )
+                }
             }
         }
-    }
 
     post {
         failure {
