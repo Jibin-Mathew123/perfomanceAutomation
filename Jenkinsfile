@@ -59,36 +59,41 @@ pipeline {
                 def reportPath = "${env.GATLING_REPORTS_DIR}/${lastDir}".replace('\\', '/')
                 echo "Found Gatling report at: ${reportPath}"
 
-           // Create a self-contained version of the report
-                 bat """
-                   @echo off
-                   set "reportPath=${reportPath}"
+               // Create a self-contained version of the report
+                     bat """
+                       @echo off
+                       set "reportPath=${reportPath}"
 
-                   :: Create a temporary directory
-                   mkdir "%reportPath%\\jenkins-report"
+                       :: Create a temporary directory
+                       mkdir "%reportPath%\\jenkins-report"
 
-                   :: Copy all required files
-                   copy "%reportPath%\\index.html" "%reportPath%\\jenkins-report\\"
-                   copy "%reportPath%\\js\\*" "%reportPath%\\jenkins-report\\"
-                   copy "%reportPath%\\style\\*" "%reportPath%\\jenkins-report\\"
+                       :: Copy all required files
+                       copy "%reportPath%\\index.html" "%reportPath%\\jenkins-report\\"
+                       copy "%reportPath%\\js\\*" "%reportPath%\\jenkins-report\\"
+                       copy "%reportPath%\\style\\*" "%reportPath%\\jenkins-report\\"
 
-                   :: Modify index.html to use correct paths
-                   powershell -Command "(Get-Content '%reportPath%\\index.html') -replace 'js/', '' -replace 'style/', '' | Set-Content '%reportPath%\\jenkins-report\\index.html'"
-                 """
+                       :: Modify index.html to use correct paths
+                       powershell -Command "(Get-Content '%reportPath%\\index.html') -replace 'js/', '' -replace 'style/', '' | Set-Content '%reportPath%\\jenkins-report\\index.html'"
+                     """
 
-                 publishHTML([
-                   target: [
-                     reportDir: "${reportPath}/jenkins-report",
-                     reportFiles: 'index.html',
-                     reportName: 'Gatling Report',
-                     keepAll: true,
-                     alwaysLinkToLastBuild: true
-                   ]
-                 ])
-               }
-             }
-           }
+                     publishHTML([
+                       target: [
+                         reportDir: "${reportPath}/jenkins-report",
+                         reportFiles: 'index.html',
+                         reportName: 'Gatling Report',
+                         keepAll: true,
+                         alwaysLinkToLastBuild: true
+                       ]
+                     ])
 
+                echo "Successfully published Gatling report"
+
+                // Store the report path for post-build actions
+                env.REPORT_PATH = reportPath
+              }
+            }
+          }
+        }
 
         post {
           always {
