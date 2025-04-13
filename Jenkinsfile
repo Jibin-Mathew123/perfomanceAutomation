@@ -30,24 +30,34 @@ pipeline {
                // Wait for reports to be generated
                sleep(time: 10, unit: 'SECONDS')
 
-               // Find the most recent simulation folder
-               def simulationDirs = findFiles(glob: "${GATLING_REPORTS_DIR}/*")
+               // Debug: List all contents of gatling directory
+               bat """
+                 @echo off
+                 echo Listing contents of %WORKSPACE%\\target\\gatling
+                 dir /s /b "%WORKSPACE%\\target\\gatling"
+               """
 
-               // Fixed: Use length instead of isEmpty()
-               if (simulationDirs.length == 0) {
+               // Find all simulation folders (excluding lastRun.txt)
+               def simulationDirs = findFiles(glob: "${GATLING_REPORTS_DIR}/*").findAll {
+                 it.isDirectory() && it.name != 'lastRun.txt'
+               }
+
+               if (simulationDirs.size() == 0) {
                  error "No Gatling simulation directories found in ${GATLING_REPORTS_DIR}"
                }
 
+               // Get the most recent simulation folder
                def latestSimulation = simulationDirs.sort { -it.lastModified }[0].name
                def reportPath = "${GATLING_REPORTS_DIR}/${latestSimulation}"
 
-               echo "Publishing Gatling report from: ${reportPath}"
+               echo "Found Gatling report at: ${reportPath}"
 
-               // Verify report files exist
+               // Verify index.html exists
                if (!fileExists("${reportPath}/index.html")) {
                  error "Gatling report index.html not found in ${reportPath}"
                }
 
+               // Publish HTML report
                publishHTML([
                  target: [
                    reportDir: reportPath,
@@ -58,6 +68,8 @@ pipeline {
                    allowMissing: false
                  ]
                ])
+
+               echo "✅ Successfully published Gatling report"
              }
            }
          }
