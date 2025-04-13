@@ -24,7 +24,7 @@ pipeline {
       }
     }
 
-     stage('Archive Gatling Reports') {
+      stage('Archive Gatling Reports') {
            steps {
              script {
                // Wait for reports to be generated
@@ -38,23 +38,21 @@ pipeline {
                """
 
                // Find all simulation folders (excluding lastRun.txt)
-               def simulationDirs = findFiles(glob: "${GATLING_REPORTS_DIR}/*").findAll {
-                 it.isDirectory() && it.name != 'lastRun.txt'
-               }
+               def simulationDirs = findFiles(glob: "${GATLING_REPORTS_DIR}/basicsimulation-*")
 
                if (simulationDirs.size() == 0) {
-                 error "No Gatling simulation directories found in ${GATLING_REPORTS_DIR}"
+                 error "No Gatling simulation directories found matching pattern ${GATLING_REPORTS_DIR}/basicsimulation-*"
                }
 
                // Get the most recent simulation folder
                def latestSimulation = simulationDirs.sort { -it.lastModified }[0].name
                def reportPath = "${GATLING_REPORTS_DIR}/${latestSimulation}"
 
-               echo "Found Gatling report at: ${reportPath}"
+               echo " Found Gatling report at: ${reportPath}"
 
                // Verify index.html exists
                if (!fileExists("${reportPath}/index.html")) {
-                 error "Gatling report index.html not found in ${reportPath}"
+                 error " Gatling report index.html not found in ${reportPath}"
                }
 
                // Publish HTML report
