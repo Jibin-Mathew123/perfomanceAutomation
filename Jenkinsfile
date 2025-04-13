@@ -26,8 +26,8 @@ pipeline {
     stage('Archive Gatling Reports') {
       steps {
         publishHTML(target: [
-          reportDir: 'target/gatling/basicsimulation/*',
-          reportFiles: 'index.html',
+          reportDir: 'target/gatling/basicsimulation',
+          reportFiles: '*/index.html',
           reportName: 'Gatling Report',
           keepAll: true
         ])
