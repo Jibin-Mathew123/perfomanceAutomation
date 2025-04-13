@@ -13,7 +13,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git 'https://your.repo.url'  // replace with your repo
+        git 'https://github.com/Jibin-Mathew123/perfomanceAutomation.git'  // replace with your repo
       }
     }
 
