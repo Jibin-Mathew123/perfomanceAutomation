@@ -59,25 +59,36 @@ pipeline {
                 def reportPath = "${env.GATLING_REPORTS_DIR}/${lastDir}".replace('\\', '/')
                 echo "Found Gatling report at: ${reportPath}"
 
-                // Publish the report
-                publishHTML([
-                  target: [
-                    reportDir: reportPath,
-                    reportFiles: 'index.html',
-                    reportName: 'Gatling Report',
-                    keepAll: true,
-                    alwaysLinkToLastBuild: true,
-                    allowMissing: false
-                  ]
-                ])
-                echo "Successfully published Gatling report"
+           // Create a self-contained version of the report
+                 bat """
+                   @echo off
+                   set "reportPath=${reportPath}"
 
-                // Store the report path for post-build actions
-                env.REPORT_PATH = reportPath
-              }
-            }
-          }
-        }
+                   :: Create a temporary directory
+                   mkdir "%reportPath%\\jenkins-report"
+
+                   :: Copy all required files
+                   copy "%reportPath%\\index.html" "%reportPath%\\jenkins-report\\"
+                   copy "%reportPath%\\js\\*" "%reportPath%\\jenkins-report\\"
+                   copy "%reportPath%\\style\\*" "%reportPath%\\jenkins-report\\"
+
+                   :: Modify index.html to use correct paths
+                   powershell -Command "(Get-Content '%reportPath%\\index.html') -replace 'js/', '' -replace 'style/', '' | Set-Content '%reportPath%\\jenkins-report\\index.html'"
+                 """
+
+                 publishHTML([
+                   target: [
+                     reportDir: "${reportPath}/jenkins-report",
+                     reportFiles: 'index.html',
+                     reportName: 'Gatling Report',
+                     keepAll: true,
+                     alwaysLinkToLastBuild: true
+                   ]
+                 ])
+               }
+             }
+           }
+
 
         post {
           always {
