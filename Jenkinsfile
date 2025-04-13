@@ -56,8 +56,8 @@ pipeline {
                   error " No Gatling simulation directories found in ${gatlingPath}"
                 }
 
-                def reportPath = "${GATLING_REPORTS_BASE}/${lastDir}".replace('\\', '/')
-                echo " Found Gatling report at: ${reportPath}"
+                def reportPath = "${env.GATLING_REPORTS_DIR}/${lastDir}".replace('\\', '/')
+                echo "Found Gatling report at: ${reportPath}"
 
                 // Publish the report
                 publishHTML([
@@ -70,7 +70,10 @@ pipeline {
                     allowMissing: false
                   ]
                 ])
-                echo "✅ Successfully published Gatling report"
+                echo "Successfully published Gatling report"
+
+                // Store the report path for post-build actions
+                env.REPORT_PATH = reportPath
               }
             }
           }
@@ -78,7 +81,11 @@ pipeline {
 
         post {
           always {
-            archiveArtifacts artifacts: "${GATLING_REPORTS_BASE}/**/*", allowEmptyArchive: true
+            script {
+              // Use the stored report path or fallback to default
+              def archivePath = env.REPORT_PATH ?: 'target/gatling'
+              archiveArtifacts artifacts: "${archivePath}/**/*", allowEmptyArchive: true
+            }
             echo 'Pipeline execution finished.'
           }
           failure {
@@ -89,3 +96,5 @@ pipeline {
           }
         }
       }
+
+
