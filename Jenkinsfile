@@ -1,59 +1,46 @@
 pipeline {
-    agent any
+  agent any
 
-    tools {
-        maven 'Maven 3.8.6'
-        jdk 'JDK-21'
+  tools {
+    maven 'Maven 3.8.6'   // Use the exact name configured in Jenkins
+    jdk 'JDK-21'          // Same here
+  }
+
+  environment {
+      MAVEN_OPTS = '-Dmaven.repo.local=C:/Users/jibin/.m2/repository'
     }
 
-    environment {
-        MAVEN_OPTS = '-Dmaven.repo.local=C:/Users/jibin/.m2/repository'
+  stages {
+    stage('Checkout') {
+      steps {
+        git 'https://github.com/Jibin-Mathew123/perfomanceAutomation.git'  // replace with your repo
+      }
     }
 
-    stages {
-        stage('Build & Run Gatling') {
-            steps {
-                bat 'mvn clean gatling:test'
-            }
-        }
-
-        stage('Publish Gatling Report') {
-            steps {
-                script {
-                    // Find all Gatling report index.html files
-                    def files = findFiles(glob: 'target/gatling/*/index.html')
-                    if (files.length == 0) {
-                        echo "△ No Gatling report found."
-                        return
-                    }
-
-                    // Get the most recent report
-                    def latestReport = files.sort { -it.lastModified }.first()
-                    def reportDir = latestReport.path.replaceAll('/index.html$', '')
-
-                    echo "Publishing Gatling report from: ${reportDir}"
-
-                    // Publish the HTML report
-                    publishHTML(
-                        target: [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: reportDir,
-                            reportFiles: 'index.html',
-                            reportName: 'Gatling Report'
-                        ]
-                    )
-                }
-            }
-        }
-
-    post {
-        failure {
-            echo "❌ Build failed. Check Maven or Gatling errors."
-        }
-        success {
-            echo "✅ Pipeline finished successfully!"
-        }
+    stage('Build & Run Gatling Test') {
+      steps {
+        bat 'mvn clean gatling:test'
+      }
     }
+
+    stage('Archive Gatling Reports') {
+      steps {
+        publishHTML(target: [
+          reportDir: 'target/gatling/basicsimulation/*',
+          reportFiles: 'index.html',
+          reportName: 'Gatling Report',
+          keepAll: true
+        ])
+      }
+    }
+  }
+
+  post {
+    always {
+      echo 'Pipeline execution finished.'
+    }
+    failure {
+      echo 'There was a failure. Check the logs and report.'
+    }
+  }
 }
