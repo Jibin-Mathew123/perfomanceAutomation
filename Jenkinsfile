@@ -5,7 +5,10 @@ pipeline {
     maven 'Maven 3.8.6'   // Use the exact name configured in Jenkins
     jdk 'JDK-21'          // Same here
   }
-
+parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'staging', 'prod'], description: 'Select target environment')
+        string(name: 'SIMULATION_CLASS', defaultValue: 'BasicSimulation', description: 'Fully qualified Gatling simulation class')
+    }
   environment {
       MAVEN_OPTS = '-Dmaven.repo.local=C:/Users/jibin/.m2/repository'
       GATLING_REPORTS_DIR = 'target/gatling'
@@ -20,7 +23,8 @@ pipeline {
 
     stage('Build & Run Gatling Test') {
       steps {
-        bat 'mvn clean gatling:test'
+         echo "Running test on environment: ${params.ENVIRONMENT}"
+                            bat "mvn clean gatling:test -Dgatling.simulationClass=${params.SIMULATION_CLASS} -Denv=${params.ENVIRONMENT}"
       }
     }
 
