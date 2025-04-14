@@ -40,10 +40,30 @@ class apigee extends Simulation {
       //          jsonPath("$.data.first_name").is("Janet"))
 
     )
+  val scenario3 = scenario("Single user not found")
+    .exec(
+      http("Single user not found")
+        .get("/users/23")
+        .check(status.is(404))
+      //          jsonPath("$.data.first_name").is("Janet"))
+
+    )
+
+  val scenario4 = scenario("List Users")
+    .exec(
+      http("List Users")
+        .get("/unknown")
+        .check(status.is(200))
+      //          jsonPath("$.data.first_name").is("Janet"))
+
+    )
+
 
   setUp(
     scenario1.inject(rampUsers(users) during (rampDuration.seconds)),
-    scenario2.inject(rampUsers(users) during (rampDuration.seconds))
+    scenario2.inject(rampUsers(users) during (rampDuration.seconds)),
+    scenario3.inject(rampUsers(users) during (rampDuration.seconds)),
+    scenario4.inject(rampUsers(users) during (rampDuration.seconds))
   ).protocols(httpProtocol)
     .maxDuration(testDuration.seconds)
 }
