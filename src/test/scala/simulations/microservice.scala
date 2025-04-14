@@ -1,13 +1,18 @@
 package simulations
 
+import com.typesafe.config.{Config, ConfigFactory}
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
 
 class microservice extends Simulation{
 
+  val env = System.getProperty("env", "dev")
+  val config: Config = ConfigFactory.parseResources(s"environments/${env}.conf")
+
+  val baseUrl = config.getString("baseUrl")
   //protocol
 
-  val httpProtocol = http.baseUrl("https://reqres.in/api")
+  val httpProtocol = http.baseUrl(baseUrl)
 
   //scenario
 
@@ -22,6 +27,6 @@ class microservice extends Simulation{
 
   //setup
 
-  setUp(scn.inject(constantUsersPerSec(100).during(600))
+  setUp(scn.inject(constantUsersPerSec(100).during(60))
     .protocols(httpProtocol))
 }
