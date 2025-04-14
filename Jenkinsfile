@@ -7,7 +7,7 @@ pipeline {
   }
 parameters {
         choice(name: 'ENVIRONMENT', choices: ['dev', 'qa', 'staging', 'prod'], description: 'Select target environment')
-        string(name: 'SIMULATION_CLASS', defaultValue: 'BasicSimulation', description: 'Fully qualified Gatling simulation class')
+        string(name: 'SIMULATION_CLASS', defaultValue: 'simulations.BasicSimulation', description: 'Fully qualified Gatling simulation class')
     }
   environment {
       MAVEN_OPTS = '-Dmaven.repo.local=C:/Users/jibin/.m2/repository'
