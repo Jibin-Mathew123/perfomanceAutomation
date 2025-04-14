@@ -86,7 +86,7 @@ parameters {
 
                      publishHTML([
                        target: [
-                         reportDir: "${reportPath}/jenkins-report",
+                         reportDir: "target/gatling/${simulationName}-*",
                          reportFiles: 'index.html',
                          reportName: 'Gatling Report',
                          keepAll: true,
