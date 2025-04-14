@@ -33,92 +33,37 @@ parameters {
 
       stage('Publish Gatling Report') {
             steps {
-              script {
-                // Wait for files to be written
-                sleep(time: 15, unit: 'SECONDS')
-
-                // Debug: Show exact directory structure
-                bat """
-                  @echo off
-                  echo FULL GATLING DIRECTORY STRUCTURE:
-                  dir /s /b "%WORKSPACE%\\target\\gatling"
-                  echo CURRENT WORKSPACE: %WORKSPACE%
-                """
-
-                // Get the actual path that works
-                def gatlingPath = "${env.WORKSPACE}\\target\\gatling".replace('/', '\\')
                 def simulationName = params.SIMULATION_CLASS.split('\\.').last()
+                script {
+                                    bat '''
+                                    echo FULL GATLING DIRECTORY STRUCTURE:
+                                    dir target\gatling /s /b
+                                    '''
+                                }
 
-                // Find the most recent simulation directory
-                def cmd = """
-                  @echo off
-                  for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\"${simulationName}"-*"') do (
-                    set LAST_DIR=%%i
-                  )
+          }
+        }
 
-                """
+         post {
+             always {
+                 script {
+                     // Read the latest run directory name from lastRun.txt
+                     def lastRunFile = readFile 'target/gatling/lastRun.txt'
+                     def latestRun = lastRunFile.trim()
 
-                def lastDir = bat(script: cmd, returnStdout: true).trim()
+                     echo "Latest Gatling run directory: ${latestRun}"
 
-                if (!lastDir) {
-                  error " No Gatling simulation directories found in ${gatlingPath}"
-                }
-
-                def reportPath = "${env.GATLING_REPORTS_DIR}/${lastDir}".replace('\\', '/')
-                echo "Found Gatling report at: ${reportPath}"
-
-               // Create a self-contained version of the report
-                     bat """
-                       @echo off
-                       set "reportPath=${reportPath}"
-
-                       :: Create a temporary directory
-                       mkdir "%reportPath%\\jenkins-report"
-
-                       :: Copy all required files
-                       copy "%reportPath%\\index.html" "%reportPath%\\jenkins-report\\"
-                       copy "%reportPath%\\js\\*" "%reportPath%\\jenkins-report\\"
-                       copy "%reportPath%\\style\\*" "%reportPath%\\jenkins-report\\"
-
-                       :: Modify index.html to use correct paths
-                       powershell -Command "(Get-Content '%reportPath%\\index.html') -replace 'js/', '' -replace 'style/', '' | Set-Content '%reportPath%\\jenkins-report\\index.html'"
-                     """
-
-                     publishHTML([
-                       target: [
-                         reportDir: "target/gatling/${simulationName}-*",
-                         reportFiles: 'index.html',
-                         reportName: 'Gatling Report',
+                     publishHTML(target: [
+                         allowMissing: false,
+                         alwaysLinkToLastBuild: true,
                          keepAll: true,
-                         alwaysLinkToLastBuild: true
-                       ]
+                         reportDir: "target/gatling/${latestRun}",
+                         reportFiles: 'index.html',
+                         reportName: 'Gatling Report'
                      ])
-
-                echo "Successfully published Gatling report"
-
-                // Store the report path for post-build actions
-                env.REPORT_PATH = reportPath
-              }
-            }
-          }
-        }
-
-        post {
-          always {
-            script {
-              // Use the stored report path or fallback to default
-              def archivePath = env.REPORT_PATH ?: 'target/gatling'
-              archiveArtifacts artifacts: "${archivePath}/**/*", allowEmptyArchive: true
-            }
-            echo 'Pipeline execution finished.'
-          }
-          failure {
-            echo 'There was a failure. Check the logs and report.'
-          }
-          success {
-            echo 'Pipeline completed successfully!'
-          }
-        }
+                 }
+             }
+         }
       }
 
 
