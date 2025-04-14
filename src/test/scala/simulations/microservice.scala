@@ -39,7 +39,9 @@ class microservice extends Simulation{
 
     )
 
-  setUp(scenario1.inject(rampUsers(users) during (rampDuration.seconds))
-    .protocols(httpProtocol)).maxDuration(testDuration.seconds)
-  scenario2.inject(rampUsers(users) during (rampDuration.seconds))
+  setUp(
+    scenario1.inject(rampUsers(users) during (rampDuration.seconds)),
+    scenario2.inject(rampUsers(users) during (rampDuration.seconds))
+  ).protocols(httpProtocol)
+    .maxDuration(testDuration.seconds)
 }
