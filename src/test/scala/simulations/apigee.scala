@@ -19,7 +19,7 @@ class apigee extends Simulation {
     .baseUrl(baseUrl)
     .acceptHeader("application/json")
 
-  val scenario1 = scenario("Get API Request")
+  val scenario1 = scenario("Get List Users")
     .exec(
       http("Get List Users")
         .get("/users?page=2")
@@ -29,7 +29,7 @@ class apigee extends Simulation {
     )
 
 
-  val scenario2 = scenario("Get API Request")
+  val scenario2 = scenario("Get Single User")
     .exec(
       http("Get Single User")
         .get("/users/2")
