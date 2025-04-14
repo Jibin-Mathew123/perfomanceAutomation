@@ -3,9 +3,12 @@ package simulations
 import com.typesafe.config.{Config, ConfigFactory}
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
+import utils.AuthTokenGenerator
+
 import scala.concurrent.duration._
 
 class microservice extends Simulation{
+  val authToken: String = AuthTokenGenerator.generateToken()
 
   val env = System.getProperty("env", "qa")
   val config: Config = ConfigFactory.parseResources(s"environments/${env}.conf")
@@ -14,6 +17,7 @@ class microservice extends Simulation{
   //protocol
 
   val httpProtocol = http.baseUrl(baseUrl)
+//    .header("Authorization", "#{authToken}") // Using the generated token
   val users: Int = Integer.getInteger("users", 10)
   val rampDuration: Int = Integer.getInteger("ramp", 10)
   val testDuration: Int = Integer.getInteger("duration", 60)

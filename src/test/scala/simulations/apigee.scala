@@ -2,10 +2,12 @@ package simulations
 
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
+
 import scala.concurrent.duration._
 import com.typesafe.config.{Config, ConfigFactory}
-
+import utils.AuthTokenGenerator
 class apigee extends Simulation {
+  val authToken: String = AuthTokenGenerator.generateToken()
 
   val env = System.getProperty("env", "qa")
   val config: Config = ConfigFactory.parseResources(s"environments/${env}.conf")
@@ -18,6 +20,7 @@ class apigee extends Simulation {
   val httpProtocol = http
     .baseUrl(baseUrl)
     .acceptHeader("application/json")
+//    .header("Authorization", "#{authToken}") // Using the generated token
 
   val scenario1 = scenario("Get List Users")
     .exec(
