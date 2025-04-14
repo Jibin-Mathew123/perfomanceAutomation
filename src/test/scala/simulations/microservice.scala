@@ -3,16 +3,20 @@ package simulations
 import com.typesafe.config.{Config, ConfigFactory}
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
+import scala.concurrent.duration._
 
 class microservice extends Simulation{
 
-  val env = System.getProperty("env", "dev")
+  val env = System.getProperty("env", "qa")
   val config: Config = ConfigFactory.parseResources(s"environments/${env}.conf")
 
   val baseUrl = config.getString("baseUrl")
   //protocol
 
   val httpProtocol = http.baseUrl(baseUrl)
+  val users: Int = Integer.getInteger("users", 10)
+  val rampDuration: Int = Integer.getInteger("ramp", 10)
+  val testDuration: Int = Integer.getInteger("duration", 60)
 
   //scenario
 
@@ -27,6 +31,6 @@ class microservice extends Simulation{
 
   //setup
 
-  setUp(scn.inject(constantUsersPerSec(100).during(60))
-    .protocols(httpProtocol))
+  setUp(scn.inject(rampUsers(users) during (rampDuration.seconds))
+    .protocols(httpProtocol)).maxDuration(testDuration.seconds)
 }
