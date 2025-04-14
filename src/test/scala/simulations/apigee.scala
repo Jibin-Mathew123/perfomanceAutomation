@@ -28,9 +28,6 @@ class apigee extends Simulation {
 
     )
 
-  setUp(scenario1.inject( rampUsers(users) during (rampDuration.seconds))
-    .protocols(httpProtocol)).maxDuration(testDuration.seconds)
-
 
   val scenario2 = scenario("Get API Request")
     .exec(
@@ -41,6 +38,7 @@ class apigee extends Simulation {
 
     )
 
-  setUp(scenario2.inject(rampUsers(users) during (rampDuration.seconds))
+  setUp(scenario1.inject(rampUsers(users) during (rampDuration.seconds))
     .protocols(httpProtocol)).maxDuration(testDuration.seconds)
+  scenario2.inject(rampUsers(users) during (rampDuration.seconds))
 }
