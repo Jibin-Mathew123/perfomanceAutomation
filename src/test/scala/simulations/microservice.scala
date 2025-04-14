@@ -43,7 +43,7 @@ class microservice extends Simulation{
 
     )
 
-  al scenario3 = scenario("Single user not found")
+  val scenario3 = scenario("Single user not found")
     .exec(
       http("Single user not found")
         .get("/users/23")
