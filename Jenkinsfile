@@ -44,11 +44,12 @@ parameters {
 
                 // Get the actual path that works
                 def gatlingPath = "${env.WORKSPACE}\\target\\gatling".replace('/', '\\')
+                def targetPath = "${params.SIMULATION_CLASS}".split(".")[1]
 
                 // Find the most recent simulation directory
                 def cmd = """
                   @echo off
-                  for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\basicsimulation-*"') do (
+                  for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\"${targetPath}"-*"') do (
                     set LAST_DIR=%%i
                   )
                   echo %LAST_DIR%
