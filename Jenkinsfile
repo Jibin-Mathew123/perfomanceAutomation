@@ -52,7 +52,7 @@ parameters {
                 // Find the most recent simulation directory
                 def cmd = """
                   @echo off
-                  for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\"${targetPath}"-*"') do (
+                  for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\"${simulationName}"-*"') do (
                     set LAST_DIR=%%i
                   )
                   echo %LAST_DIR%
