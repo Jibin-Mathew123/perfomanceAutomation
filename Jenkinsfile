@@ -27,7 +27,7 @@ parameters {
     stage('Build & Run Gatling Test') {
       steps {
          echo "Running test on environment: ${params.ENVIRONMENT}"
-          bat "mvn clean gatling:test -Dgatling.simulationClass=${params.SIMULATION_CLASS} -Denv=${params.ENVIRONMENT} -Dusers=${params.USERS} -Dramp=${params.RAMP_DURATION} l-Dduration=${params.TEST_DURATION}"
+          bat "mvn clean gatling:test -Dgatling.simulationClass=${params.SIMULATION_CLASS} -Denv=${params.ENVIRONMENT} -Dusers=${params.USERS} -Dramp=${params.RAMP_DURATION} -Dduration=${params.TEST_DURATION}"
       }
     }
 
