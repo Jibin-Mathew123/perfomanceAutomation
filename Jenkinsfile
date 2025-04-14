@@ -55,7 +55,7 @@ parameters {
                   for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\"${simulationName}"-*"') do (
                     set LAST_DIR=%%i
                   )
-                  echo %LAST_DIR%
+               
                 """
 
                 def lastDir = bat(script: cmd, returnStdout: true).trim()
