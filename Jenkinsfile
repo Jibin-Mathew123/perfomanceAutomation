@@ -34,7 +34,7 @@ parameters {
       stage('Publish Gatling Report') {
             steps {
                 def simulationName = params.SIMULATION_CLASS.split('\\.').last()
-          }
+        }
         }
 
          post {
@@ -56,7 +56,6 @@ parameters {
                      ])
                  }
              }
-         }
       }
 
 
