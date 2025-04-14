@@ -20,17 +20,28 @@ class microservice extends Simulation{
 
   //scenario
 
-  val scn = scenario("Get API Request")
+  val scenario1 = scenario("Get API Request")
     .exec(
-      http("Get Single User")
-        .get("/users?page=2" )
+      http("Get List Users")
+        .get("/users?page=2")
         .check(status.is(200))
-//          jsonPath("$.data.first_name").is("Janet"))
+      //          jsonPath("$.data.first_name").is("Janet"))
 
     )
 
-  //setup
+  setUp(scenario1.inject(rampUsers(users) during (rampDuration.seconds))
+    .protocols(httpProtocol)).maxDuration(testDuration.seconds)
 
-  setUp(scn.inject(rampUsers(users) during (rampDuration.seconds))
+
+  val scenario2 = scenario("Get API Request")
+    .exec(
+      http("Get Single User")
+        .get("/users/2")
+        .check(status.is(200))
+      //          jsonPath("$.data.first_name").is("Janet"))
+
+    )
+
+  setUp(scenario2.inject(rampUsers(users) during (rampDuration.seconds))
     .protocols(httpProtocol)).maxDuration(testDuration.seconds)
 }

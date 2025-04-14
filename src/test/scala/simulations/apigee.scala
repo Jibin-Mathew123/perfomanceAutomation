@@ -19,15 +19,28 @@ class apigee extends Simulation {
     .baseUrl(baseUrl)
     .acceptHeader("application/json")
 
-  val scn = scenario("Get API Request")
+  val scenario1 = scenario("Get API Request")
     .exec(
-      http("Get Single User")
+      http("Get List Users")
         .get("/users?page=2")
         .check(status.is(200))
       //          jsonPath("$.data.first_name").is("Janet"))
 
     )
 
-  setUp(scn.inject( rampUsers(users) during (rampDuration.seconds))
+  setUp(scenario1.inject( rampUsers(users) during (rampDuration.seconds))
+    .protocols(httpProtocol)).maxDuration(testDuration.seconds)
+
+
+  val scenario2 = scenario("Get API Request")
+    .exec(
+      http("Get Single User")
+        .get("/users/2")
+        .check(status.is(200))
+      //          jsonPath("$.data.first_name").is("Janet"))
+
+    )
+
+  setUp(scenario2.inject(rampUsers(users) during (rampDuration.seconds))
     .protocols(httpProtocol)).maxDuration(testDuration.seconds)
 }
