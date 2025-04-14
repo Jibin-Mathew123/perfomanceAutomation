@@ -34,13 +34,6 @@ parameters {
       stage('Publish Gatling Report') {
             steps {
                 def simulationName = params.SIMULATION_CLASS.split('\\.').last()
-                script {
-                                    bat '''
-                                    echo FULL GATLING DIRECTORY STRUCTURE:
-                                    dir target\gatling /s /b
-                                    '''
-                                }
-
           }
         }
 
