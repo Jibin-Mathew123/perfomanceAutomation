@@ -90,8 +90,7 @@ parameters {
                          reportFiles: 'index.html',
                          reportName: 'Gatling Report',
                          keepAll: true,
-                         alwaysLinkToLastBuild: true,
-                         includes: '**/*.js,**/*.css,**/*.png'
+                         alwaysLinkToLastBuild: true
                        ]
                      ])
 
