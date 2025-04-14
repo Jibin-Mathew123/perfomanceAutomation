@@ -66,5 +66,4 @@ class apigee extends Simulation {
     scenario4.inject(rampUsers(users) during (rampDuration.seconds))
   ).protocols(httpProtocol)
     .maxDuration(testDuration.seconds)
-      .enableLocalShare(true) // Helps with resource paths
 }

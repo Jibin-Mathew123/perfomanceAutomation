@@ -69,5 +69,4 @@ class microservice extends Simulation{
 
   ).protocols(httpProtocol)
     .maxDuration(testDuration.seconds)
-    .enableLocalShare(true) // Helps with resource paths
 }
