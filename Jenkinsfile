@@ -27,7 +27,7 @@ parameters {
     stage('Build & Run Gatling Test') {
       steps {
          echo "Running test on environment: ${params.ENVIRONMENT}"
-          bat "mvn clean gatling:test -Dgatling.simulationClass=${params.SIMULATION_CLASS} -Denv=${params.ENVIRONMENT} -Dusers=${params.USERS} -Dramp=${params.RAMP_DURATION} -Dduration=${params.TEST_DURATION}"
+          bat "mvn clean gatling:test -Dgatling.simulationClass=${params.SIMULATION_CLASS} -Denv=${params.ENVIRONMENT} -Dusers=${params.USERS} -Dramp=${params.RAMP_DURATION} l-Dduration=${params.TEST_DURATION}"
       }
     }
 
@@ -47,7 +47,7 @@ parameters {
 
                 // Get the actual path that works
                 def gatlingPath = "${env.WORKSPACE}\\target\\gatling".replace('/', '\\')
-                def targetPath = "${params.SIMULATION_CLASS}".split(".")[1]
+                def simulationName = params.SIMULATION_CLASS.split('\\.').last()
 
                 // Find the most recent simulation directory
                 def cmd = """
