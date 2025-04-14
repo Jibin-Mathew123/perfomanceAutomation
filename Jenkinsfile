@@ -55,7 +55,7 @@ parameters {
                   for /f "tokens=*" %%i in ('dir /ad /b /od "${gatlingPath}\\"${simulationName}"-*"') do (
                     set LAST_DIR=%%i
                   )
-               
+
                 """
 
                 def lastDir = bat(script: cmd, returnStdout: true).trim()
@@ -90,7 +90,8 @@ parameters {
                          reportFiles: 'index.html',
                          reportName: 'Gatling Report',
                          keepAll: true,
-                         alwaysLinkToLastBuild: true
+                         alwaysLinkToLastBuild: true,
+                         includes: '**/*.js,**/*.css,**/*.png'
                        ]
                      ])
 
